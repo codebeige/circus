@@ -1,0 +1,48 @@
+{:tasks
+ {:requires ([babashka.fs :as fs])
+
+  clean {:doc "Remove build artefacts"
+         :task (fs/delete-tree "target")}
+
+  clobber {:depends [clean]
+           :doc "Restore project to pristine state"
+           :task (do (fs/delete-tree "node_modules")
+                     (fs/delete-tree ".clj-kondo/.cache")
+                     (fs/delete-tree ".clj-kondo/imports")
+                     (fs/delete-tree ".cpcache")
+                     (fs/delete-tree ".lsp/.cache"))}
+
+  dev {:doc "Start default development environment (dev:serve)"
+       :depends [dev:serve]}
+
+  dev:init {:doc "Install development dependencies"
+            :task (do
+                   (clojure "-P -M:dev:cljs:nrepl")
+                   (shell "npm install"))}
+
+  dev:clj {:doc "Start nREPL server"
+           :task (clojure "-M:dev:nrepl")}
+
+  dev:clj:repl {:doc "Start interactive nREPL"
+                :task (clojure "-M:dev:nrepl" "--interactive" "--color")}
+
+  dev:serve {:doc "Start ClojureScript development environment"
+             :task (run '-dev:serve {:parallel true})}
+  -dev:serve {:depends [dev:cljs dev:css]}
+
+  dev:cljs {:doc "Serve example project compiling ClojureScript on changes"
+            :task (shell "npx shadow-cljs watch dev")}
+
+  dev:css {:doc "Compile and watch CSS for example project"
+           :task (shell "npx tailwindcss"
+                        "--cwd" "examples/7guis"
+                        "--input" "src/seven_guis/app.css"
+                        "--output" "../../target/7guis/css/app.css"
+                        "--map"
+                        "--watch")}
+
+  dev:cljs:repl {:doc "Start interactive browser repl"
+                 :task (shell "npx shadow-cljs cljs-repl dev")}
+
+  dev:cljs:build-repl {:doc "Start interactive build repl"
+                       :task (shell "npx shadow-cljs clj-repl")}}}

@@ -1,0 +1,9 @@
+{:deps {:aliases [:dev :cljs]}
+ :dev-http {9000 ["target/7guis" "examples/7guis/public/"]}
+ :builds
+ {:dev
+  {:target :browser
+   :modules {:app {:init-fn seven-guis.app/init}}
+   :output-dir "target/7guis/js"
+   :asset-path "/js"
+   :devtools {:preloads [preloads.jsprint]}}}}

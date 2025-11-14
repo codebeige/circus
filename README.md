@@ -22,5 +22,25 @@ with the core principles and philosophy of Clojure and ClojureScript.
 * 🐘 Local-first state management & synchronisation
 * 🤹🏻‍♂️ Embrace namespaces as basic unit of composition
 
+## Development
+
+### Prerequisites
+
+* [Clojure](https://clojure.org)
+* [Node.js](https://nodejs.org)
+* [Babashka](https://babashka.org)
+
+### Setup
+
+```sh
+bb dev:init
+```
+
+### Start
+
+```sh
+bb dev
+```
+
 [^1]: [A ClojureScript Survival Kit](https://github.com/swannodette/conj-2025-talk)
 [^2]: [Moira](https://github.com/pitch-io/moira)
