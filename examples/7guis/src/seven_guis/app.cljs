@@ -1,17 +1,19 @@
 (ns seven-guis.app
-  (:require [circus.core :as circus]
+  (:require [integrant.core :as ig]
             [seven-guis.counter.ui :as counter]
             [seven-guis.app.ui :as app]))
 
-(def system
-  {::counter/ui 0
-   ::app/ui {:counter ::counter/ui
-             :root-id "app"}})
+(def config
+  {::app/ui {:counter (ig/ref ::counter/ui)
+             :root-id "app"}
+   ::counter/ui 0})
 
-(defonce app (circus/make system))
+(def system (atom nil))
 
+#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn init []
-  (circus/start! app))
+  (reset! system (ig/init config)))
 
 (comment
- (circus/stop! app))
+ (init)
+ (ig/halt! @system))

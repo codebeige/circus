@@ -12,13 +12,13 @@
                      (fs/delete-tree ".cpcache")
                      (fs/delete-tree ".lsp/.cache"))}
 
+  init {:doc "Install development dependencies"
+        :task (do
+               (clojure "-P -M:dev:cljs:nrepl")
+               (shell "npm install"))}
+
   dev {:doc "Start default development environment (dev:serve)"
        :depends [dev:serve]}
-
-  dev:init {:doc "Install development dependencies"
-            :task (do
-                   (clojure "-P -M:dev:cljs:nrepl")
-                   (shell "npm install"))}
 
   dev:clj {:doc "Start nREPL server"
            :task (clojure "-M:dev:nrepl")}
