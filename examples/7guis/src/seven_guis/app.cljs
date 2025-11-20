@@ -8,12 +8,16 @@
              :root-id "app"}
    ::counter/ui 0})
 
-(def system (atom nil))
+(defonce system (atom nil))
 
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn init []
   (reset! system (ig/init config)))
 
-(comment
- (init)
- (ig/halt! @system))
+(defn suspend! []
+  (ig/suspend! @system))
+
+(defn resume []
+  (swap! system (partial ig/resume config)))
+
+(defmethod ig/resume-key :default [_ _ _ state]
+  state)

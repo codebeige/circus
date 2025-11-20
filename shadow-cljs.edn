@@ -6,4 +6,6 @@
    :modules {:app {:init-fn seven-guis.app/init}}
    :output-dir "target/7guis/js"
    :asset-path "/js"
-   :devtools {:preloads [preloads.jsprint]}}}}
+   :devtools {:after-load seven-guis.app/resume
+              :before-load seven-guis.app/suspend!
+              :preloads [preloads.jsprint]}}}}

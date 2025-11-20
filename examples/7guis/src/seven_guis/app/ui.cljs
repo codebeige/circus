@@ -9,7 +9,7 @@
    [:h2 "Counter"]
    counter])
 
-(defn dispatch! [e data]
+(defn dispatch! [_ data]
   (doseq [d data] (js/pr d)))
 
 (defmethod ig/init-key ::ui [_ {:keys [root-id] :as state}]
@@ -18,5 +18,6 @@
     (r/render el (ui (select-keys state [:counter])))
     (assoc state :el el)))
 
-(defmethod ig/halt-key! ::ui [_ {:keys [el]}]
-  (dom/removeChildren el))
+(defmethod ig/resume-key ::ui [_ _ _ {:keys [el] :as state}]
+  (r/render el (ui (select-keys state [:counter])))
+  state)
