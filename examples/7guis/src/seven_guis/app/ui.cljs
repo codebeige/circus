@@ -4,10 +4,9 @@
             [replicant.dom :as r]))
 
 (defn ui [{:keys [counter]}]
-  [:div
-   [:h1 "🎪 Circus – 7 GUIs"]
-   [:h2 "Counter"]
-   counter])
+  [:div.mx-16.my-12
+   [:h1.text-4xl.text-gray-700.font-medium.my-8 "7GUIs"]
+   (counter)])
 
 (defn dispatch! [_ data]
   (doseq [d data] (js/pr d)))
