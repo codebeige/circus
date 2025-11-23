@@ -7,6 +7,10 @@
 - [ ] Conversational AI - shared application log
 - [ ] Local first - synced state
 
+## FAQ
+
+- [ ] How does it differ from integrant?
+
 ## Backlog
 
 - [ ] Performance testing
