@@ -1,6 +1,5 @@
 (ns seven-guis.counter.ui
-  (:require [circus.core :as circus]
-            [integrant.core :as ig]))
+  (:require [circus.core :as circus]))
 
 (defn window [title & children]
   [:div.inline-flex.flex-col.gap-5.pb-6.rounded-lg.bg-white.drop-shadow-md.select-none
@@ -27,15 +26,15 @@
      {:on {:click [[::count-incremented]]}}
      "Count")]))
 
-(defmethod ig/init-key ::ui [_ init-count]
-  (let [count (atom init-count)]
-    {:count count
-     :ui #(ui @count)}))
+; (defmethod ig/init-key ::ui [_ init-count]
+;   (let [count (atom init-count)]
+;     {:count count
+;      :ui #(ui @count)}))
 
-(defmethod ig/resolve-key ::ui [_ {:keys [ui]}]
-  ui)
+; (defmethod ig/resolve-key ::ui [_ {:keys [ui]}]
+;   ui)
 
-(defmethod circus/tx-key ::ui [_ {:keys [count] :as state} {:keys [type]}]
-  (when (= ::count-incremented type)
-    (swap! count inc))
-  state)
+; (defmethod circus/tx-key ::ui [_ {:keys [count] :as state} {:keys [type]}]
+;   (when (= ::count-incremented type)
+;     (swap! count inc))
+;   state)

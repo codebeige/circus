@@ -17,18 +17,15 @@
                (clojure "-P -M:dev:cljs:nrepl")
                (shell "npm install"))}
 
-  dev {:doc "Start default development environment (dev:serve)"
-       :depends [dev:serve]}
+  dev {:doc "Start nREPL server"
+       :task (clojure "-M:dev:nrepl")}
 
-  dev:clj {:doc "Start nREPL server"
-           :task (clojure "-M:dev:nrepl")}
-
-  dev:clj:repl {:doc "Start interactive nREPL"
-                :task (clojure "-M:dev:nrepl" "--interactive" "--color")}
+  dev:repl {:doc "Start interactive nREPL (Clojure)"
+            :task (clojure "-M:dev:nrepl" "--interactive" "--color")}
 
   dev:serve {:doc "Start ClojureScript development environment"
              :task (run '-dev:serve {:parallel true})}
-  -dev:serve {:depends [dev:cljs dev:css]}
+  -dev:serve {:depends [dev:cljs dev:css test:serve]}
 
   dev:cljs {:doc "Serve example project compiling ClojureScript on changes"
             :task (shell "npx shadow-cljs watch dev")}
@@ -45,4 +42,13 @@
                  :task (shell "npx shadow-cljs cljs-repl dev")}
 
   dev:cljs:build-repl {:doc "Start interactive build repl"
-                       :task (shell "npx shadow-cljs clj-repl")}}}
+                       :task (shell "npx shadow-cljs clj-repl")}
+
+  test {:doc "Run all tests both with Clojure and ClojureScript"
+        :depends [test:clj]}
+
+  test:clj {:doc "Run all tests with Clojure"
+            :task (clojure "-M:test")}
+
+  test:serve {:doc "Start ClojureScript test runner in a browser"
+              :task (shell "npx shadow-cljs watch test")}}}

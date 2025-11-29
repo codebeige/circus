@@ -1,16 +1,9 @@
 (ns circus.core
-  (:require [integrant.core :as ig])
-  (:refer-clojure :exclude [update]))
+  (:require [circus.dep :as dep]))
 
-(defmulti tx-key
-  {:arglists '([key system event])}
-  (fn [k _ _] (ig/normalize-key k)))
+(defn dep
+  "Creates and returns a dependency referring to the module with `key`.
 
-(defmethod tx-key :default [_ system _]
-  system)
-
-(defn tx
-  ([system e]
-   (tx system (keys system) e))
-  ([system ks e]
-   (ig/run! system ks #(tx-key %1 %2 e))))
+  Use [[deref]] to access the currently exported value."
+  [key]
+  (dep/make key))

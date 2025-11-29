@@ -1,0 +1,6 @@
+{:linters
+ {:type-mismatch
+  {:namespaces
+   {circus.dep
+    {Dep {:implements #{clojure.lang.IDeref}}
+     resolve {:arities {2 {:ret :circus.dep/Dep}}}}}}}}

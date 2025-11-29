@@ -1,29 +1,39 @@
 (ns seven-guis.app
   (:require [circus.core :as circus]
-            [integrant.core :as ig]
-            [seven-guis.counter.ui :as counter]
-            [seven-guis.app.ui :as app]))
-
-(defonce system (atom nil))
+            [circus.event :as event]
+            [seven-guis.app.ui :as app]
+            [seven-guis.counter.ui :as counter]))
 
 (def config
-  {::app/ui {:counter (ig/ref ::counter/ui)
-             :tx #(circus/tx @system %1)
+  {::app/ui {:counter (circus/import ::counter/ui)
              :root-id "app"}
    ::counter/ui 0})
 
-; disable default behaviour
-(defmethod ig/resume-key :default [_ _ _ state]
-  state)
+(defonce system (atom config))
+
+(declare tx)
+
+(defn dispatch! [e data]
+  (doseq [[type & xs] data]
+    (tx (-> (event/make type xs)
+            (assoc :ui/event e)))))
 
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn init []
-  (reset! system (ig/init config)))
+(defn start []
+  (r/set-dispatch! dispatch!)
+  (swap! system circus/start))
 
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn suspend! []
-  (ig/suspend! @system))
+(defn pause []
+  (swap! system circus/pause))
 
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn resume []
-  (swap! system (partial ig/resume config)))
+  (swap! system circus/resume))
+
+(defn tx [event]
+  (swap! system circus/tx event))
+
+(comment
+ clojure.core/ref
+ (keyword ::foo))

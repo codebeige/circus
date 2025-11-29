@@ -1,5 +1,6 @@
 {:deps {:aliases [:dev :cljs]}
- :dev-http {9000 ["target/7guis" "examples/7guis/public/"]}
+ :dev-http {8000 ["target/test"]
+            9000 ["target/7guis" "examples/7guis/public/"]}
  :builds
  {:dev
   {:target :browser
@@ -8,4 +9,7 @@
    :asset-path "/js"
    :devtools {:after-load seven-guis.app/resume
               :before-load seven-guis.app/suspend!
-              :preloads [preloads.jsprint]}}}}
+              :preloads [preloads.jsprint]}}
+  :test
+  {:target :browser-test
+   :test-dir "target/test"}}}
