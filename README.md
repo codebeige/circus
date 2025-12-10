@@ -1,3 +1,13 @@
+> ⚠️ This software project is in the earliest planning and exploration stage.
+>
+> The goal is to create a brain dump outlining my thoughts on flexible,
+> scalable, and idiomatic patterns for web application development using
+> ClojureScript and Clojure. I’m still exploring initial ideas and strategies,
+> drawing partly from my previous work with the Moira library [^2]. Inspired by
+> David Nolan’s Clojure Conj 2025 talk [^1], this project aims for a simpler, more
+> functional mental model with minimal reliance on the JavaScript ecosystem
+> (e.g., React).
+
 # 🎪 Circus
 
 Functional UI in pure Clojure(Script).
