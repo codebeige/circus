@@ -3,10 +3,11 @@
             [circus.generators :as gen*]
             [circus.module :as module]
             [clojure.set :as set]
-            [clojure.test :refer [deftest is]]
+            [clojure.test :refer [are deftest is]]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
-            [clojure.test.check.properties :as prop]))
+            [clojure.test.check.properties :as prop])
+  #?(:clj (:import [clojure.lang ExceptionInfo])))
 
 (deftest resolve-test
   (try
@@ -30,26 +31,82 @@
     (is (not (dep/resolved? x)))
     (is (dep/resolved? (-> x (dep/resolve system))))))
 
-(defn topo-seq-is-superset-of-entry-points-prop [system-ks]
-  (prop/for-all [[system ks] system-ks]
-    (set/superset? (into #{} (dep/topo-seq system ks))
-                   (into #{} ks))))
+(deftest deps-test
+  (are [ks f] (= ks (sort (dep/deps f)))
+    [] nil
+    [] 123
+    [] {}
+    [:foo] (dep/make :foo)
+    [:bar] [:foo (dep/make :bar) :baz]
+    [:baz] {:foo {:bar (dep/make :baz)}}
+    [:a] [(dep/make :a) (dep/make :a) (dep/make :a)]
+    [:x :y :z] {:a (dep/make :x)
+                :b (dep/make :y)
+                :c (dep/make :z)}))
 
-(defspec topo-seq-is-superset-of-entry-points 100
-  (topo-seq-is-superset-of-entry-points-prop gen*/system-ks*))
+(deftest deps?-test
+  (are [deps? f] (= deps? (some? (dep/deps? f)))
+    false nil
+    false 123
+    false {}
+    true {:a (dep/make :x)
+          :b (dep/make :y)
+          :c (dep/make :z)}
+    true {:foo {:bar (dep/make :baz)}}
+    true [:foo (dep/make :bar) :baz]
+    true (dep/make :foo)
+    true [(dep/make :a) (dep/make :a) (dep/make :a)]))
+
+(deftest topo-seq-aborts-on-cyclic-dep-test
+  (are [system ks] (dep/ex-cyclic-dep?
+                 (try
+                   (doall (dep/topo-seq system))
+                   :not-thrown
+                   (catch ExceptionInfo ex
+                     ex)))
+    {:A {:self (dep/make :A)}} [:A]
+    {:A {:b (dep/make :B)}
+     :B {:c (dep/make :C)}
+     :C {:a (dep/make :A)}} [:A]))
+
+(defn topo-seq-includes-entry-points-prop [system-ks]
+  (prop/for-all [[system ks] system-ks]
+    (is (set/subset? (into #{} ks)
+                     (into #{} (dep/topo-seq system ks))))))
+
+(defspec topo-seq-includes-entry-points 100
+  (topo-seq-includes-entry-points-prop gen*/system-ks*))
 
 (comment
  (tc/quick-check 1000
-   (topo-seq-is-superset-of-entry-points-prop gen*/system-ks)))
+   (topo-seq-includes-entry-points-prop gen*/system-ks)))
 
 (defn topo-seq-includes-dependencies-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
-    ; FIXME: implement
-    ))
+    (set/subset? (into #{} (mapcat #(dep/deps (get system %))) ks)
+                 (into #{} (dep/topo-seq system ks)))))
+
+(defspec topo-seq-includes-dependencies 100
+  (topo-seq-includes-dependencies-prop gen*/system-ks*))
+
+(comment
+ (tc/quick-check 1000
+   (topo-seq-includes-dependencies-prop gen*/system-ks)))
 
 (defn topo-seq-is-sorted-in-topological-order-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
-    ; FIXME: implement
-    ))
+    (loop [[visited [k & rest-ks]] [#{} (dep/topo-seq system ks)]]
+      (when k
+        (is (set/superset? visited (into #{} (dep/deps (get system k)))))
+        (recur [(conj visited k) rest-ks])))
+    true))
 
-; TODO: test cycle detection
+(defspec topo-seq-is-sorted-in-topological-order 100
+  (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks*))
+
+(comment
+ (tc/quick-check 1000
+   (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks)))
+
+; TODO: topo-seq-reverse
+; TODO: data reader

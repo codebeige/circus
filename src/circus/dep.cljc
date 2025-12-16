@@ -39,6 +39,12 @@
   (assert (dep? dep))
   (not= ::unresolved (:val dep)))
 
+(defn deps [f]
+  (distinct (keep #(when (dep? %) (:key %)) (tree-seq coll? seq f))))
+
+(defn deps? [f]
+  (seq (deps f)))
+
 (defn ex-cyclic-dep
   "Create an instance of `ExceptionInfo` specific to cyclic dependency errors.
 
@@ -63,12 +69,26 @@
   ordered before modules that depend on them. Throws [[ex-cyclic-dep]] when a
   circular dependency is detected."
   ([system] (topo-seq system (keys system)))
-  ([system ks] ks))
+  ([system ks]
+   (let [postwalk (fn postwalk [k visited]
+                    (when (k visited)
+                      (throw (ex-cyclic-dep k visited)))
+                    (lazy-seq
+                     (concat
+                      (mapcat #(postwalk % (conj visited k))
+                              (deps (get system k)))
+                      [k])))]
+     (distinct (mapcat postwalk ks (repeat #{}))))))
+
 
 (comment
- (let [system {:module-a {:a "A" :b (make :module-b)}
-               :module-b "B"}]
-   (-> system
-       (get-in [:module-a :b])
-       (resolve system)
-       deref)))
+ (let [system {:A {:b (make :B)}
+               :B {:c (make :C)
+                   :d (make :D)}
+               :E {:b (make :B)
+                   :f (make :F)
+                   :g (make :G)}}]
+
+   (topo-seq system [:A :B :E]))
+
+ (concat (mapcat vector nil) [1 2 3]))

@@ -11,20 +11,17 @@
    (fn [n]
      (gen/shuffle (range n)))))
 
-(defn max-verts [n]
-  (/ (* n (- n 1)) 2))
-
 (defn verts [topo]
   (let [n (count topo)
-        max-vts (min (max-verts n) (* 2 n))]
-    (if (pos? max-vts)
+        max-verts (min (/ (* n (- n 1)) 2) (* 2 n))]
+    (if (pos? max-verts)
       (gen/set
        (gen/fmap
         sort
         (gen/such-that
          (partial apply not=)
          (gen/tuple (gen/elements topo) (gen/elements topo))))
-       {:max-elements max-vts})
+       {:max-elements max-verts})
       (gen/return #{}))))
 
 (def dag
@@ -58,16 +55,20 @@
 
 (def system
   (gen/let [{:keys [nodes verts]} dag
-            mods (gen/vector
-                  (gen/resize
-                   10
-                   (gen/tuple
-                    (gen/one-of [gen/keyword gen/keyword-ns])
-                    (gen/frequency
-                     [[8 (gen/map gen/any-equatable gen/any {:max-elements 5})]
-                      [2 gen/any]])))
-                  (count nodes))]
-    (let [mod-key (fn [n] (first (nth mods n)))]
+            ks (gen/vector-distinct
+                (gen/resize
+                 10
+                 (gen/one-of [gen/keyword gen/keyword-ns]))
+                {:num-elements (count nodes)})
+            vs (gen/vector
+                (gen/resize
+                 10
+                 (gen/frequency
+                  [[8 (gen/map gen/any-equatable gen/any {:max-elements 5})]
+                   [2 gen/any]]))
+                (count nodes))]
+    (let [mods (mapv vector ks vs)
+          mod-key (fn [n] (first (nth mods n)))]
       (reduce
        (fn [m [n1 n2]]
          (update m (mod-key n1) assoc-any (key* n2) (dep/make (mod-key n2))))
@@ -92,3 +93,10 @@
   (gen/let [m system
             ks (entry-points m)]
     [m ks]))
+
+(comment
+ (require '[clojure.test.check :as tc]
+          '[clojure.test.check.properties :as prop])
+ (tc/quick-check 1000
+   (prop/for-all [_ system-ks]
+     true)))
