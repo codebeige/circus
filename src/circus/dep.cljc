@@ -1,46 +1,56 @@
 (ns circus.dep
-  (:require [circus.module :as module])
-  (:refer-clojure :exclude [resolve])
-  #?(:clj (:import [clojure.lang IDeref IRecord])))
+  (:require [circus.module :as module]
+            #?(:clj [clojure.core :refer [print-method]]))
+  (:refer-clojure :exclude [key resolve])
+  #?(:clj (:import [clojure.lang IDeref])))
 
-(defn- when-resolved [x]
-  (when (not= ::unresolved x) x))
+(defprotocol Resolvable
+  (key [this]
+    "Returns the key for resolving `dep` in context of the current system.")
+  (resolve [this m]
+    "Resolves `this` in context of system `m`.
+    Returns a new `dep` that can be dereferenced to retrieve the exported value
+    from the current module state in `m`."))
 
-(defrecord Dep [key val]
+(declare ->Dep)
+
+(deftype Dep [k m]
   IDeref
-  #?(:clj (deref [_]
-            (when-resolved val))
-     :cljs (-deref [_]
-             (when-resolved val))))
+  #?(:clj (deref [_] (module/export k (get m k)))
+     :cljs (-deref [_] (module/export k (get m k))))
+  Resolvable
+  (key [_] k)
+  (resolve [_ m] (->Dep k m)))
 
-#?(:clj (defmethod print-method Dep [x ^java.io.Writer w]
-          (let [p (get-method print-method IRecord)]
-            (p x w))))
+#?(:clj
+   (defmethod print-method Dep [this writer]
+     (.write writer "#circus/dep[")
+     (print-method (key this) writer)
+     (.write writer " ")
+     (print-method @this writer)
+     (.write writer "]"))
+   :cljs
+   (extend-type Dep
+     IPrintWithWriter
+     (-pr-writer [this writer opts]
+       (-write writer "#circus/dep[")
+       (-pr-writer (key this) writer opts)
+       (-write writer " ")
+       (if (satisfies? IPrintWithWriter @this)
+         (-pr-writer @this writer opts)
+         (-write writer (pr-str @this)))
+       (-write writer "]"))))
 
 (defn make [k]
-  (->Dep k ::unresolved))
-
-(defn resolve
-  "Resolves `dep` in context of `system`.
-  Returns a new `dep` with `val` set to the export from the module referrred by
-  `dep`."
-  {:arglists '[[dep system]]}
-  [{:keys [key] :as dep} system]
-  (assoc dep :val (module/export key (get system key))))
+  (->Dep k nil))
 
 (defn dep?
   "Returns `true` if `x` is a dependency."
   [x]
   (instance? Dep x))
 
-(defn resolved?
-  "Returns `true` if `dep` has a value that can be obtained with [[deref]]."
-  [dep]
-  (assert (dep? dep))
-  (not= ::unresolved (:val dep)))
-
 (defn deps [f]
-  (distinct (keep #(when (dep? %) (:key %)) (tree-seq coll? seq f))))
+  (distinct (keep #(when (dep? %) (key %)) (tree-seq coll? seq f))))
 
 (defn deps? [f]
   (seq (deps f)))

@@ -48,7 +48,7 @@
         :depends [test:clj]}
 
   test:clj {:doc "Run all tests with Clojure"
-            :task (clojure "-M:test")}
+            :task (clojure "-M:dev:test")}
 
   test:serve {:doc "Start ClojureScript test runner in a browser"
               :task (shell "npx shadow-cljs watch test")}}}

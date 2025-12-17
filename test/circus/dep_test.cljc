@@ -25,12 +25,6 @@
   (is (dep/dep? (dep/make :a)))
   (is (not (dep/dep? {:key :a :val 123}))))
 
-(deftest resolved?-test
-  (let [x (dep/make :x)
-        system {}]
-    (is (not (dep/resolved? x)))
-    (is (dep/resolved? (-> x (dep/resolve system))))))
-
 (deftest deps-test
   (are [ks f] (= ks (sort (dep/deps f)))
     [] nil
@@ -109,4 +103,3 @@
    (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks)))
 
 ; TODO: topo-seq-reverse
-; TODO: data reader
