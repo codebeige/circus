@@ -1,6 +1,8 @@
 (ns circus.dep
-  (:require [circus.module :as module]
-            #?(:clj [clojure.core :refer [print-method]]))
+  (:require #?(:clj [clojure.core :refer [print-method]])
+            [circus.module :as module]
+            #?(:clj [clojure.pprint :as pprint]
+               :cljs [cljs.pprint :as pprint]))
   (:refer-clojure :exclude [key resolve])
   #?(:clj (:import [clojure.lang IDeref])))
 
@@ -40,6 +42,9 @@
          (-pr-writer @this writer opts)
          (-write writer (pr-str @this)))
        (-write writer "]"))))
+
+(defmethod pprint/simple-dispatch Dep [this]
+  (pr this))
 
 (defn make [k]
   (->Dep k nil))
@@ -91,6 +96,27 @@
      (distinct (mapcat postwalk ks (repeat #{}))))))
 
 
+(defn rev-topo-seq
+  "Returns a sequence of module keys `ks` and their dependencies in reverse
+  topological order.
+
+  See [[topo-seq]] for details."
+  ([system] (rev-topo-seq system (keys system)))
+  ([system ks]
+   (let [rev-topo-ks (sort
+                      (fn [k1 k2]
+                        (some? (some #{k2} (deps (get system k1)))))
+                      ks)
+         prewalk (fn prewalk [k visited]
+                   (when (k visited)
+                     (throw (ex-cyclic-dep k visited)))
+                   (lazy-seq
+                    (conj
+                     (mapcat #(prewalk % (conj visited k))
+                             (deps (get system k)))
+                     k)))]
+     (distinct (mapcat prewalk rev-topo-ks (repeat #{}))))))
+
 (comment
  (let [system {:A {:b (make :B)}
                :B {:c (make :C)
@@ -98,7 +124,7 @@
                :E {:b (make :B)
                    :f (make :F)
                    :g (make :G)}}]
-
-   (topo-seq system [:A :B :E]))
-
- (concat (mapcat vector nil) [1 2 3]))
+   [(topo-seq system [:A :B :E])       ; (:C :D :B :A :F :G :E)
+    (rev-topo-seq system [:A :B :E])]  ; (:A :B :C :D :E :F :G)
+   )
+ )

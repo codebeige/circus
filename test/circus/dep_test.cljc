@@ -19,7 +19,7 @@
       (is (nil? @x))
       (is (= "B" @(dep/resolve x system))))
     (finally
-     (remove-method module/export ::module-b))))
+      (remove-method module/export ::module-b))))
 
 (deftest dep?-test
   (is (dep/dep? (dep/make :a)))
@@ -53,11 +53,11 @@
 
 (deftest topo-seq-aborts-on-cyclic-dep-test
   (are [system ks] (dep/ex-cyclic-dep?
-                 (try
-                   (doall (dep/topo-seq system))
-                   :not-thrown
-                   (catch ExceptionInfo ex
-                     ex)))
+                    (try
+                      (doall (dep/topo-seq system))
+                      :not-thrown
+                      (catch ExceptionInfo ex
+                        ex)))
     {:A {:self (dep/make :A)}} [:A]
     {:A {:b (dep/make :B)}
      :B {:c (dep/make :C)}
@@ -72,8 +72,8 @@
   (topo-seq-includes-entry-points-prop gen*/system-ks*))
 
 (comment
- (tc/quick-check 1000
-   (topo-seq-includes-entry-points-prop gen*/system-ks)))
+  (tc/quick-check 1000
+    (topo-seq-includes-entry-points-prop gen*/system-ks)))
 
 (defn topo-seq-includes-dependencies-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
@@ -84,22 +84,79 @@
   (topo-seq-includes-dependencies-prop gen*/system-ks*))
 
 (comment
- (tc/quick-check 1000
-   (topo-seq-includes-dependencies-prop gen*/system-ks)))
+  (tc/quick-check 1000
+    (topo-seq-includes-dependencies-prop gen*/system-ks)))
 
 (defn topo-seq-is-sorted-in-topological-order-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
-    (loop [[visited [k & rest-ks]] [#{} (dep/topo-seq system ks)]]
-      (when k
-        (is (set/superset? visited (into #{} (dep/deps (get system k)))))
-        (recur [(conj visited k) rest-ks])))
-    true))
+    (let [ks* (dep/topo-seq system ks)]
+      (every?
+       (fn [[visited k]]
+         (is (set/superset?
+              (into #{} visited)
+              (into #{} (dep/deps (get system k))))))
+       (map-indexed (fn [i k] [(take i ks*) k]) ks*)))))
 
 (defspec topo-seq-is-sorted-in-topological-order 100
   (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks*))
 
 (comment
- (tc/quick-check 1000
-   (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks)))
+  (tc/quick-check 1000
+    (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks)))
 
-; TODO: topo-seq-reverse
+(deftest rev-topo-seq-aborts-on-cyclic-dep-test
+  (are [system ks] (dep/ex-cyclic-dep?
+                    (try
+                      (doall (dep/rev-topo-seq system))
+                      :not-thrown
+                      (catch ExceptionInfo ex
+                        ex)))
+    {:A {:self (dep/make :A)}} [:A]
+    {:A {:b (dep/make :B)}
+     :B {:c (dep/make :C)}
+     :C {:a (dep/make :A)}} [:A]))
+
+(defn rev-topo-seq-includes-entry-points-prop [system-ks]
+  (prop/for-all [[system ks] system-ks]
+    (is (set/subset? (into #{} ks)
+                     (into #{} (dep/rev-topo-seq system ks))))))
+
+(defspec rev-topo-seq-includes-entry-points 100
+  (rev-topo-seq-includes-entry-points-prop gen*/system-ks*))
+
+(comment
+  (tc/quick-check 1000
+    (rev-topo-seq-includes-entry-points-prop gen*/system-ks)))
+
+(defn rev-topo-seq-includes-dependencies-prop [system-ks]
+  (prop/for-all [[system ks] system-ks]
+    (set/subset? (into #{} (mapcat #(dep/deps (get system %))) ks)
+                 (into #{} (dep/rev-topo-seq system ks)))))
+
+(defspec rev-topo-seq-includes-dependencies 100
+  (rev-topo-seq-includes-dependencies-prop gen*/system-ks*))
+
+(comment
+  (tc/quick-check 1000
+    (rev-topo-seq-includes-dependencies-prop gen*/system-ks)))
+
+(defn rev-topo-seq-is-sorted-in-reverse-topological-order-prop [system-ks]
+  (prop/for-all [[system ks] system-ks]
+    (let [ks* (dep/rev-topo-seq system ks)]
+      (every?
+       (fn [[visited k]]
+         (is (empty? (set/intersection
+                      (into #{} visited)
+                      (into #{} (dep/deps (get system k)))))))
+       (map-indexed (fn [i k] [(take i ks*) k]) ks*)))))
+
+(defspec rev-topo-seq-is-sorted-in-reverse-topological-order 100
+  (rev-topo-seq-is-sorted-in-reverse-topological-order-prop gen*/system-ks*))
+
+(comment
+  (tc/quick-check 100
+    (rev-topo-seq-is-sorted-in-reverse-topological-order-prop gen*/system-ks*)))
+
+(comment
+ (pr (dep/make :foo))
+ )
