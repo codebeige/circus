@@ -95,28 +95,6 @@
                       [k])))]
      (distinct (mapcat postwalk ks (repeat #{}))))))
 
-
-(defn rev-topo-seq
-  "Returns a sequence of module keys `ks` and their dependencies in reverse
-  topological order.
-
-  See [[topo-seq]] for details."
-  ([system] (rev-topo-seq system (keys system)))
-  ([system ks]
-   (let [rev-topo-ks (sort
-                      (fn [k1 k2]
-                        (some? (some #{k2} (deps (get system k1)))))
-                      ks)
-         prewalk (fn prewalk [k visited]
-                   (when (k visited)
-                     (throw (ex-cyclic-dep k visited)))
-                   (lazy-seq
-                    (conj
-                     (mapcat #(prewalk % (conj visited k))
-                             (deps (get system k)))
-                     k)))]
-     (distinct (mapcat prewalk rev-topo-ks (repeat #{}))))))
-
 (comment
  (let [system {:A {:b (make :B)}
                :B {:c (make :C)
@@ -124,7 +102,5 @@
                :E {:b (make :B)
                    :f (make :F)
                    :g (make :G)}}]
-   [(topo-seq system [:A :B :E])       ; (:C :D :B :A :F :G :E)
-    (rev-topo-seq system [:A :B :E])]  ; (:A :B :C :D :E :F :G)
-   )
+   (topo-seq system [:A :B :E])) ; (:C :D :B :A :F :G :E)
  )
