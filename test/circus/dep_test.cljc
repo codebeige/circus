@@ -65,8 +65,9 @@
 
 (defn topo-seq-includes-entry-points-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
-    (is (set/subset? (into #{} ks)
-                     (into #{} (dep/topo-seq system ks))))))
+    (is
+     (set/subset? (into #{} ks)
+                  (into #{} (dep/topo-seq system ks))))))
 
 (defspec topo-seq-includes-entry-points 100
   (topo-seq-includes-entry-points-prop gen*/system-ks*))
@@ -77,8 +78,9 @@
 
 (defn topo-seq-includes-dependencies-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
-    (set/subset? (into #{} (mapcat #(dep/deps (get system %))) ks)
-                 (into #{} (dep/topo-seq system ks)))))
+    (is
+     (set/subset? (into #{} (mapcat #(dep/deps (get system %))) ks)
+                  (into #{} (dep/topo-seq system ks))))))
 
 (defspec topo-seq-includes-dependencies 100
   (topo-seq-includes-dependencies-prop gen*/system-ks*))
@@ -90,12 +92,13 @@
 (defn topo-seq-is-sorted-in-topological-order-prop [system-ks]
   (prop/for-all [[system ks] system-ks]
     (let [ks* (dep/topo-seq system ks)]
-      (every?
-       (fn [[visited k]]
-         (is (set/superset?
-              (into #{} visited)
-              (into #{} (dep/deps (get system k))))))
-       (map-indexed (fn [i k] [(take i ks*) k]) ks*)))))
+      (is
+       (every?
+        (fn [[visited k]]
+          (set/superset?
+           (into #{} visited)
+           (into #{} (dep/deps (get system k)))))
+        (map-indexed (fn [i k] [(take i ks*) k]) ks*))))))
 
 (defspec topo-seq-is-sorted-in-topological-order 100
   (topo-seq-is-sorted-in-topological-order-prop gen*/system-ks*))
