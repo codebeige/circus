@@ -48,8 +48,50 @@ bb dev:init
 
 ### Start
 
+For Clojure development, simply start the nREPL server with:
+
 ```sh
 bb dev
+```
+
+To spawn a complete ClojureScript development environment, the following will
+
+* watch and compile an example project available at [localhost:9000](http://localhost:9000)
+* watch and compile the test runner available at [localhost:8000](http://localhost:8000)
+* watch and compile CSS
+
+```sh
+bb dev:cljs
+```
+
+See [Shadow CLJS help](https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration)
+for details on how to select the respective ClojureScript build inside your
+editor of choice.
+
+```clj
+(shadow/select :dev)
+```
+
+### Test
+
+Run all tests once on Clojure with
+
+```sh
+bb test
+```
+
+To watch and compile all tests for ClojureScript, start the test runner and
+open it in a browser at[localhost:8000](http://localhost:8000).
+
+```sh
+bb test:cljs
+```
+
+This can also be used for a more minimal ClojureScript development setup, where
+you connect to the build of the ClojureScript test runner:
+
+```clj
+(shadow/select :test)
 ```
 
 [^1]: [A ClojureScript Survival Kit](https://github.com/swannodette/conj-2025-talk)
