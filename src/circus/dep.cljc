@@ -85,14 +85,14 @@
   circular dependency is detected."
   ([system] (topo-seq system (keys system)))
   ([system ks]
-   (let [postwalk (fn postwalk [k visited]
-                    (when (k visited)
-                      (throw (ex-cyclic-dep k visited)))
-                    (lazy-seq
-                     (concat
-                      (mapcat #(postwalk % (conj visited k))
-                              (deps (get system k)))
-                      [k])))]
+   (letfn [(postwalk [k visited]
+             (when (k visited)
+               (throw (ex-cyclic-dep k visited)))
+             (lazy-seq
+              (concat
+               (mapcat #(postwalk % (conj visited k))
+                       (deps (get system k)))
+               [k])))]
      (distinct (mapcat postwalk ks (repeat #{}))))))
 
 (comment
