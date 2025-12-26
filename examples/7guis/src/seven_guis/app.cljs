@@ -24,17 +24,5 @@
   (r/set-dispatch! dispatch!)
   (swap! system circus/start))
 
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn pause []
-  (swap! system circus/pause))
-
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
-(defn resume []
-  (swap! system circus/resume))
-
 (defn tx [event]
   (swap! system circus/tx event))
-
-(comment
- clojure.core/ref
- (keyword ::foo))

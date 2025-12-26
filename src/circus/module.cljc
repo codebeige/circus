@@ -1,8 +1,9 @@
 (ns circus.module)
 
 (defmulti export
-  "Returns external-facing value of module with key `k` derived from its
-  current state `ctx`.
+  "Exports external-facing value for module `k`.
+  Receives the module's current state `ctx`. The returned value is accessible
+  via `deref` on the resolved `dep`.
 
   Default: Returns `ctx` unchanged."
   {:arglists '[[k ctx]]}
@@ -12,11 +13,21 @@
 
 
 (defmulti start
-  "Returns updated state for module with key `k` by invoking `start` with the
-  module key `k` and current module state `ctx`.
+  "Starts module `k`.
+  Can have side-effects. Must return the updated module state.
 
   Default: Returns `ctx` unchanged."
   {:arglists '[[k ctx]]}
   (fn [k _] k))
 
 (defmethod start :default [_ ctx] ctx)
+
+(defmulti tx
+  "Transacts `event` on module `k`.
+  Can have side-effects. Must return the updated module state.
+
+  Default: Returns `ctx` unchanged."
+  {:arglists '[[k ctx event]]}
+  (fn [k _ _] k))
+
+(defmethod tx :default [_ ctx _] ctx)

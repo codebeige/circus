@@ -4,34 +4,35 @@
             [clojure.walk :as walk]))
 
 (defn dep
-  "Creates and returns a dependency referring to the module with `key`.
-
-  Use [[deref]] to access the currently exported value."
-  [key]
-  (dep/make key))
+  "Creates and returns a dependency referring to the module with key `k`.
+  Use `deref` to access the value returned by `module/export`."
+  [k]
+  (dep/make k))
 
 (defn- resolve-deps [f system]
   (walk/postwalk #(cond-> % (dep/dep? %) (dep/resolve system)) f))
 
-(defn tx
-  "Returns a new system state by updating each module with key in `ks` and its
-  dependencies invoking `f` on the key and module state in topological order.
+(defn invoke
+  "Invokes `f` on `ks` an all their dependencies.
+  Calls `f` for each relevant module in topological order. `f` receives the
+  module key, the module state with resolved dependencies, and `args`. Returns
+  a new `system` with module updates applied."
+  [system ks f & args]
+  (reduce (fn [system k]
+            (update system k #(apply f k (resolve-deps % system) args)))
+          system
+          (dep/topo-seq system ks)))
 
-  Dependencies are resolved with the current system state before passing the
-  module state to `f`."
-  ([system f] (tx system f (keys system)))
-  ([system f ks]
-   (reduce (fn [system k]
-             (update system k #(f k (resolve-deps % system))))
-           system
-           (dep/topo-seq system ks))))
+(defn tx
+  "Transacts `event` on `ks` and all their dependencies.
+  Invokes `module/tx` for each relevant module in topological order. Returns a
+  new `system` with module updates applied."
+  [system ks event]
+  (invoke system ks module/tx event))
 
 (defn start
-  "Returns a new system state by updating each module with key in `ks` and its
-  dependencies by invoking `module/start` for each key in topological order.
-
-  Dependencies are resolved with the current system state before passing the
-  module state to `f`."
-  {:arglists '[[system] [system ks]]}
-  [system & args]
-  (apply tx system module/start args))
+  "Starts `ks` and all their dependencies.
+  Invokes `module/start` on each relevant module in topological order. Returns
+  a new `system` with module updates applied."
+  [system ks]
+  (invoke system ks module/start))
