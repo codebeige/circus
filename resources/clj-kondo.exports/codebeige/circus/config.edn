@@ -1,4 +1,5 @@
-{:linters
+{:lint-as {circus.module/deftx clojure.core/declare}
+ :linters
  {:type-mismatch
   {:namespaces
    {circus.dep

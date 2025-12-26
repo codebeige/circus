@@ -11,6 +11,7 @@
     "Returns the key for resolving `dep` in context of the current system.")
   (resolve [this m]
     "Resolves `this` in context of system `m`.
+
     Returns a new `dep` that can be dereferenced to retrieve the exported value
     from the current module state in `m`."))
 

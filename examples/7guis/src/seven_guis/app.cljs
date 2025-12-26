@@ -1,11 +1,12 @@
 (ns seven-guis.app
   (:require [circus.core :as circus]
             [circus.event :as event]
+            [replicant.dom :as r]
             [seven-guis.app.ui :as app]
             [seven-guis.counter.ui :as counter]))
 
 (def config
-  {::app/ui {:counter (circus/import ::counter/ui)
+  {::app/ui {:counter (circus/dep ::counter/ui)
              :root-id "app"}
    ::counter/ui 0})
 

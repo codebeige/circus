@@ -16,8 +16,8 @@
     (let [x (dep/make ::module-b)
           system {::module-a {:a "A"}
                   ::module-b {:b "B"}}]
-      (is (nil? @x))
-      (is (= "B" @(dep/resolve x system))))
+      (is (nil? @x) "nil when unresolved")
+      (is (= "B" @(dep/resolve x system)) "resolve with export for key"))
     (finally
       (remove-method module/export ::module-b))))
 
