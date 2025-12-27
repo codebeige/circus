@@ -1,5 +1,5 @@
 (ns seven-guis.app.ui
-  (:require [circus.core :as circus]
+  (:require [circus.module :as module]
             [goog.dom :as dom]
             [replicant.dom :as r]))
 
@@ -8,30 +8,14 @@
    [:h1.text-4xl.text-gray-700.font-medium.my-8 "7GUIs"]
    (counter)])
 
-(defn- render! [{:keys [counter el] :as state}]
+(defn- render! [{:keys [counter el]}]
   (r/render el (ui {:counter @counter})))
 
-(circus/defmodule ::ui
-  (start [{:keys [root-id] :as state}]
-    (-> state
-        (assoc :el (dom/getElement root-id)
-        (doto render!))))
-  (resume [state]
-    (doto state render!))
-  (tx [state _]
-    (doto state render!)))
+(defmethod module/start ::ui [_ {:keys [root-id] :as ctx}]
+  (doto (assoc ctx :el (dom/getElement root-id)) render!))
 
-; (defmethod ig/init-key ::ui [_ {:keys [root-id] :as state}]
-;   (let [el (dom/getElement root-id)]
-;     (r/set-dispatch!
-;      (fn [e data]
-;        (doseq [[type & xs] data]
-;          (tx (-> (event/make type xs)
-;                  (assoc :ui/event e))))))
-;     (doto (assoc state :el el) render!)))
+(defmethod module/tx ::ui [_ ctx _]
+  (doto ctx render!))
 
-; (defmethod ig/resume-key ::ui [_ _ _ state]
-;   (doto state render!))
-
-; (defmethod circus/tx-key ::ui [_ state _]
-;   (doto state render!))
+(defmethod module/resume ::ui [_ ctx]
+  (doto ctx render!))

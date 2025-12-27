@@ -22,7 +22,15 @@
 #_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn start []
   (r/set-dispatch! dispatch!)
-  (swap! system circus/start))
+  (swap! system circus/start [::app/ui]))
 
 (defn tx [event]
-  (swap! system circus/tx event))
+  (swap! system circus/tx [::app/ui] event))
+
+#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
+(defn suspend []
+  (swap! system circus/suspend [::app/ui]))
+
+#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
+(defn resume []
+  (swap! system circus/resume [::app/ui]))

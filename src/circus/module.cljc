@@ -31,3 +31,33 @@
   (fn [k _ _] k))
 
 (defmethod tx :default [_ ctx _] ctx)
+
+(defmulti stop
+  "Stop module `k`.
+  Can have side-effects. Must return the updated module state.
+
+  Default: Returns `ctx` unchanged."
+  {:arglists '[[k ctx]]}
+  (fn [k _ _] k))
+
+(defmethod stop :default [_ ctx _] ctx)
+
+(defmulti suspend
+  "Suspend module `k`.
+  Can have side-effects. Must return the updated module state.
+
+  Default: Returns `ctx` unchanged."
+  {:arglists '[[k ctx]]}
+  (fn [k _ _] k))
+
+(defmethod suspend :default [_ ctx _] ctx)
+
+(defmulti resume
+  "Resumes module `k`.
+  Can have side-effects. Must return the updated module state.
+
+  Default: Returns `ctx` unchanged."
+  {:arglists '[[k ctx]]}
+  (fn [k _] k))
+
+(defmethod resume :default [_ ctx _] ctx)

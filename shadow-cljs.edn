@@ -4,11 +4,11 @@
  :builds
  {:dev
   {:target :browser
-   :modules {:app {:init-fn seven-guis.app/init}}
+   :modules {:app {:init-fn seven-guis.app/start}}
    :output-dir "target/7guis/js"
    :asset-path "/js"
    :devtools {:after-load seven-guis.app/resume
-              :before-load seven-guis.app/suspend!
+              :before-load seven-guis.app/suspend
               :preloads [preloads.jsprint]}}
   :test
   {:target :browser-test

@@ -63,7 +63,6 @@
 
 (defn ex-cyclic-dep
   "Create an instance of `ExceptionInfo` specific to cyclic dependency errors.
-
   `target` is the module key that triggered the exception. `visited` is a set
   of keys for the previously walked modules."
   [k visited]
@@ -80,10 +79,10 @@
 (defn topo-seq
   "Returns a sequence of module keys `ks` and their dependencies in topological
   order.
-
-  Each module key is only present once. Dependencies are guaranteed to be
-  ordered before modules that depend on them. Throws [[ex-cyclic-dep]] when a
-  circular dependency is detected."
+  Each module key appears only once, with dependencies listed before dependent
+  modules. A circular dependency triggers `ex-cyclic-dep`. While `topo-seq` is
+  lazy, inverted order needs a complete realization of the sequence, which can
+  be obtained using `reverse`."
   ([system] (topo-seq system (keys system)))
   ([system ks]
    (letfn [(postwalk [k visited]
