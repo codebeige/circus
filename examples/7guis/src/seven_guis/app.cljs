@@ -19,10 +19,9 @@
     (tx (-> (event/make type xs)
             (assoc :ui/event e)))))
 
-#_{:clojure-lsp/ignore [:clojure-lsp/unused-public-var]}
 (defn start []
   (r/set-dispatch! dispatch!)
-  (swap! system circus/start))
+  (swap! system circus/start [::app/ui]))
 
 (defn tx [event]
-  (swap! system circus/tx event))
+  (swap! system circus/tx [::app/ui] event))
