@@ -14,38 +14,29 @@
 
   init {:doc "Install development dependencies"
         :task (do
-                (clojure "-P -M:cljs:dev:nrepl")
+                (clojure "-P -M:dev:cljs:nrepl")
                 (shell "npm install"))}
 
   dev {:doc "Start nREPL server"
        :task (clojure "-M:dev:nrepl")}
 
-  dev:repl {:doc "Start interactive nREPL (Clojure)"
-            :task (clojure "-M:dev:nrepl" "--interactive" "--color")}
+  dev:cljs {:doc "Start ClojureScript development environment"
+            :task (shell "npx shadow-cljs watch dev test")}
 
   test {:doc "Run all tests with Clojure"
         :task (clojure "-M:dev:test")}
 
-  cljs:dev {:doc "Start ClojureScript development environment"
-            :task (run '-cljs:dev {:parallel true})}
-  -cljs:dev {:depends [example:serve example:css cljs:test]}
-
-  cljs:test {:doc "Start ClojureScript test runner in a browser"
+  test:cljs {:doc "Start ClojureScript test runner in a browser"
              :task (shell "npx shadow-cljs watch test")}
 
-  cljs:repl {:doc "Start interactive browser repl"
+  repl:dev {:doc "Start interactive nREPL (Clojure)"
+            :task (clojure "-M:dev:nrepl" "--interactive" "--color")}
+
+  repl:cljs {:doc "Start interactive browser repl"
              :task (shell "npx shadow-cljs cljs-repl dev")}
 
-  cljs:build-repl {:doc "Start interactive build repl"
+  repl:cljs-build {:doc "Start interactive build repl"
                    :task (shell "npx shadow-cljs clj-repl")}
 
   example:serve {:doc "Serve example project compiling ClojureScript on changes"
-                 :task (shell "npx shadow-cljs watch dev")}
-
-  example:css {:doc "Compile and watch CSS for example project"
-               :task (shell "npx tailwindcss"
-                            "--cwd" "examples/7guis"
-                            "--input" "src/seven_guis/app.css"
-                            "--output" "../../target/7guis/css/app.css"
-                            "--map"
-                            "--watch")}}}
+                 :task (shell "npx shadow-cljs watch dev")}}}
