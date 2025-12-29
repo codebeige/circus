@@ -4,8 +4,8 @@
             [replicant.dom :as r]))
 
 (defn ui [{:keys [counter]}]
-  [:div.mx-16.my-12
-   [:h1.text-4xl.text-gray-700.font-medium.my-8 "7GUIs"]
+  [:div
+   [:h1 "7GUIs"]
    (counter)])
 
 (defn- render! [{:keys [counter el]}]
