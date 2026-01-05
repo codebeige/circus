@@ -1,0 +1,39 @@
+@layer utilities {
+  .flex {
+    display: flex;
+    align-items: center;
+  }
+
+  .flex-1 {
+    flex: 1;
+  }
+
+  .gap-1 {
+    gap: 1rem;
+  }
+
+  .bg-white {
+    background: white;
+  }
+
+  .border-ui {
+    border: 1px solid var(--ui-separator);
+  }
+
+  .px-s {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .mono {
+    font-family: var(--font-family-mono);
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .font-xl {
+    font-size: 1.5rem;
+  }
+}

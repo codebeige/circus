@@ -1,11 +1,29 @@
 @layer reset, tokens, base, components, utilities, overwrites;
 
+@import "/css/ui/widgets.css";
+@import "/css/utilities.css";
+
 @layer tokens {
   :root {
-    --background: oklch(95% 0.001 180);
-    --text: oklch(15% 0.001 180);
-    --primary: oklch(60% 0.145 180);
+    --background: oklch(95% 0 260);
+    --text: oklch(25% 0.003 260);
+    --primary: oklch(85% 0.145 180);
     --secondary: oklch(70% 0.165 90);
+    --border-radius: 0.6rem;
+    --font-family-mono:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+
+    --ui-background: white;
+    --ui-text-grey: oklch(from var(--text) calc(l * 2) c h);
+    --ui-separator: oklch(from var(--text) calc(l * 3.75) c h);
+    --ui-background-glass: oklch(100% 0 0 / 75%);
+    --ui-backdrop-glass: blur(40px) saturate(180%);
+    --ui-drop-shadow:
+      0 40px 80px -30px oklch(0% 0 0 / 6%),
+      0 20px 40px -20px oklch(0% 0 0 / 5%),
+      0 8px 16px -8px oklch(0% 0 0 / 4%),
+      0 2px 4px -1px oklch(0% 0 0 / 3%);
   }
 }
 
@@ -15,19 +33,53 @@
   *::before,
   *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 112.5%;
   }
 
   body {
     margin: 0;
-    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
-      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    line-height: 1.6;
+    font-family:
+      ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+  }
+
+  button {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
   }
 }
 
 @layer base {
   body {
+    margin: 2rem 4rem;
     background: var(--background);
     color: var(--text);
+  }
+
+  h1 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    color: oklch(from var(--text) calc(l * 1.5) c h)
+  }
+
+  button {
+    background: var(--primary);
+
+    &:hover {
+      background: oklch(from var(--primary) calc(l * 0.95) c h);
+    }
   }
 }

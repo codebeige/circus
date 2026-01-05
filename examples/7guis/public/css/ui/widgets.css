@@ -1,0 +1,50 @@
+@layer components {
+  @scope (.ui-widgets-window) to (.ui-widgets-window > .main) {
+    :scope {
+      width: min-content;
+      overflow: hidden;
+      border-radius: 1rem;
+      box-shadow: var(--ui-drop-shadow);
+      background: var(--ui-background-glass);
+      backdrop-filter: var(--ui-backdrop-glass);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--ui-separator);
+      padding: 0.25rem 1rem;
+      background: var(--ui-background);
+
+      .traffic-lights {
+        display: flex;
+        gap: 0.5rem;
+        width: 4rem;
+
+        &::before,
+        &::after,
+        span {
+          content: '';
+          width: 0.75rem;
+          height: 0.75rem;
+          border-radius: 50%;
+          box-shadow: inset 0 -1px 1px oklch(0% 0 0 / 10%);
+          background: var(--ui-separator);
+        }
+      }
+
+      h4 {
+        flex: 1;
+        padding-right: 4rem;
+        color: var(--ui-text-grey);
+        font-size: 0.77778rem;
+        font-weight: 400;
+        text-align: center;
+      }
+    }
+
+    .main {
+      padding: 1rem;
+    }
+  }
+}
