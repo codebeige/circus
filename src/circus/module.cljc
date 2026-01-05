@@ -38,9 +38,9 @@
 
   Default: Returns `ctx` unchanged."
   {:arglists '[[k ctx]]}
-  (fn [k _ _] k))
+  (fn [k _] k))
 
-(defmethod stop :default [_ ctx _] ctx)
+(defmethod stop :default [_ ctx] ctx)
 
 (defmulti suspend
   "Suspend module `k`.
@@ -48,9 +48,9 @@
 
   Default: Returns `ctx` unchanged."
   {:arglists '[[k ctx]]}
-  (fn [k _ _] k))
+  (fn [k _] k))
 
-(defmethod suspend :default [_ ctx _] ctx)
+(defmethod suspend :default [_ ctx] ctx)
 
 (defmulti resume
   "Resumes module `k`.
