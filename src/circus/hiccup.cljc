@@ -2,7 +2,9 @@
   (:require [clojure.string :as str]))
 
 (defn hiccup? [x]
-  (and (vector? x) (keyword? (first x))))
+  (and (vector? x)
+       (not (map-entry? x))
+       (keyword? (first x))))
 
 (def tag-re #"([^#.]+)(?:#([^.]+))?(?:\.(.+))?")
 
@@ -27,7 +29,33 @@
     (cond-> props
       (seq class-names) (assoc :class (into #{} class-names)))))
 
-(defn normalize [[tag & body]]
+(defn normalize
+  "Recursively expand `h` into its canonical form.
+
+  `h` is expected to be a vector with a keyword as the first child, which
+  suppoprts a shorthand notation for setting the `:id` and `:class` properties.
+  Always adds a properties hash. The `:class` property is converted to a set
+  of individual class names.
+
+  Examples:
+
+  ```clj
+  => (normalize [:div])
+  [:div {}]
+  => (normalize [:div#foo.bar \"baz\"])
+  [:div {:id \"foo\" :class #{\"bar\"} \"baz\"]
+  => (normalize [:div.foo {:class \"bar baz\"]}])
+  [:div {:class #{\"foo\" \"bar\" \"baz\"}]
+  => (normalize [:div {:class [\"foo bar\" \"baz\"]}])
+  [:div {:class #{\"foo\" \"bar\" \"baz\"}]
+  ```
+  "
+
+  [[tag & body :as h]]
+
+  {:arglists '[[h]]
+   :pre [(hiccup? h)]}
+
   (let [[_ tag-name tag-id tag-classes] (re-matches tag-re (name tag))
         [props children] (if (map? (first body))
                            [(first body) (rest body)]
@@ -48,6 +76,3 @@
   (seq nil)
   (str/split "foo  bar    baz" #"\s+")
   (into {} (filter val) {:foo nil :bar "baz"}))
-
-; TODO: spec or malli
-; TODO: can I use malli for normalizing tag?
