@@ -1,6 +1,6 @@
 (ns circus.hiccup-test
   (:require [circus.hiccup :as hiccup]
-            [clojure.test :refer [are deftest]]))
+            [clojure.test :refer [are deftest is]]))
 
 (deftest normalize-shortcut-notation-test
   (are [h h*] (= h* (hiccup/normalize h))
@@ -19,3 +19,13 @@
     [:div {:class ["foo" "bar" "baz"]}] [:div {:class #{"foo" "bar" "baz"}}]
     [:div {:class "foo bar baz"}]       [:div {:class #{"foo" "bar" "baz"}}]
     [:div {:class #{"foo" "bar baz"}}]  [:div {:class #{"foo" "bar" "baz"}}]))
+
+(deftest normalize-children-test
+  (let [h* (hiccup/normalize [:ul#my-list
+                              [:li.foo "bar"]
+                              [:li.foo [:span "baz"]]])]
+    (is (= [:ul {:id "my-list"}
+            [:li {:class #{"foo"}} "bar"]
+            [:li {:class #{"foo"}}
+             [:span {} "baz"]]]
+           h*))))

@@ -1,6 +1,9 @@
 (ns circus.hiccup
   (:require [clojure.string :as str]))
 
+(defn hiccup? [x]
+  (and (vector? x) (keyword? (first x))))
+
 (def tag-re #"([^#.]+)(?:#([^.]+))?(?:\.(.+))?")
 
 (defn- compact [m]
@@ -35,6 +38,7 @@
           compact
           (backfill :id tag-id)
           (normalize-class tag-classes))]
+     (map #(cond-> % (hiccup? %) normalize))
      children)))
 
 (comment
