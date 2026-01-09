@@ -17,7 +17,7 @@
     (is (= "456" (.getAttribute n "data-my-new-val")) "add attribute")
     (is (nil? (.getAttribute n "data-my-val")) "remove attribute")))
 
-; TODO: update, add, remove boolean attributes (e.g., disabled) in expand?
+; TODO: update, add, remove boolean attributes (e.g., disabled)
 
 (comment
   (let [n (doto (.createElement js/document "div")
