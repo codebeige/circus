@@ -6,6 +6,11 @@
        (not (map-entry? x))
        (keyword? (first x))))
 
+(defn children [[_ props & children]]
+  (remove nil?
+          (cond-> children
+            (not (map? props)) (conj props))))
+
 (def tag-re #"([^#.]+)(?:#([^.]+))?(?:\.(.+))?")
 
 (defn- compact [m]
@@ -50,24 +55,23 @@
   [:div {:class #{\"foo\" \"bar\" \"baz\"}]
   ```
   "
+  {:arglists '[[h]]}
 
-  [[tag & body :as h]]
+  [x]
 
-  {:arglists '[[h]]
-   :pre [(hiccup? h)]}
-
-  (let [[_ tag-name tag-id tag-classes] (re-matches tag-re (name tag))
-        [props children] (if (map? (first body))
-                           [(first body) (rest body)]
-                           [{} body])]
-    (into
-     [(keyword tag-name)
-      (-> props
-          compact
-          (backfill :id tag-id)
-          (normalize-class tag-classes))]
-     (map #(cond-> % (hiccup? %) normalize))
-     children)))
+  (if (hiccup? x)
+    (let [[_ tag-name tag-id tag-classes] (re-matches tag-re (name (first x)))
+          [props children] (if (map? (first body))
+                             [(first body) (rest body)]
+                             [{} body])]
+      (into
+       [(keyword tag-name)
+        (-> props
+            compact
+            (backfill :id tag-id)
+            (normalize-class tag-classes))]
+       (map normalize (tree-seq hiccup? children )) ; TODO: reduce stack
+       children))))
 
 (comment
   (re-find tag-re "div#foo.bar.baz")
@@ -75,4 +79,16 @@
   (re-find tag-re "div.bar.baz")
   (seq nil)
   (str/split "foo  bar    baz" #"\s+")
-  (into {} (filter val) {:foo nil :bar "baz"}))
+  (into {} (filter val) {:foo nil :bar "baz"})
+
+  (children [:foo]) ; ()
+  (children [:foo "bar" "baz"]) ; ("bar" "baz")
+  (children [:foo {:bar 123} "baz"]) ; ("baz")
+
+
+  (tree-seq hiccup?
+            children
+            [:ul {:foo "bar"}
+             [:li [:span "A"]]
+             [:li [:span "B"]]
+             [:li [:span "C"]] ]))
