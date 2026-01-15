@@ -2,21 +2,16 @@
   (:require [circus.module :as module]
             [seven-guis.ui.widgets :as widgets]))
 
-(defn label [count]
+(defn display [count]
   [:div.flex-1.mono.text-right.font-xl.bg-white.px-s.border-ui
    count])
-
-(defn button [props children]
-  [:button
-   props
-   children])
 
 (defn ui [{:keys [count]}]
   (widgets/window
    {:title "Counter"}
    [:div.flex.gap-1
-    (label count)
-    (button
+    (display count)
+    (widgets/button
      {:on {:click [[::count-incremented]]}}
      "Count")]))
 

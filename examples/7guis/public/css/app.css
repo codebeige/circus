@@ -1,6 +1,7 @@
 @layer reset, tokens, base, components, utilities, overwrites;
 
 @import "/css/ui/widgets.css";
+@import "/css/ui/temp-converter.css";
 @import "/css/utilities.css";
 
 @layer tokens {
@@ -73,13 +74,5 @@
     margin-bottom: 1rem;
     font-size: 2rem;
     color: oklch(from var(--text) calc(l * 1.5) c h)
-  }
-
-  button {
-    background: var(--primary);
-
-    &:hover {
-      background: oklch(from var(--primary) calc(l * 0.95) c h);
-    }
   }
 }

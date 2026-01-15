@@ -1,4 +1,12 @@
 @layer components {
+  button {
+    background: var(--primary);
+
+    &:hover {
+      background: oklch(from var(--primary) calc(l * 0.95) c h);
+    }
+  }
+
   @scope (.ui-widgets-window) to (.ui-widgets-window > .main) {
     :scope {
       width: min-content;
@@ -7,6 +15,7 @@
       box-shadow: var(--ui-drop-shadow);
       background: var(--ui-background-glass);
       backdrop-filter: var(--ui-backdrop-glass);
+      margin-bottom: 2rem;
     }
 
     .header {

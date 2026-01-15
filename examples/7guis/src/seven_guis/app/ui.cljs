@@ -3,13 +3,15 @@
             [goog.dom :as dom]
             [replicant.dom :as r]))
 
-(defn ui [{:keys [counter]}]
+(defn ui [{:keys [counter temp-converter]}]
   [:div
    [:h1 "7GUIs"]
-   (counter)])
+   (counter)
+   (temp-converter)])
 
-(defn- render! [{:keys [counter el]}]
-  (r/render el (ui {:counter @counter})))
+(defn- render! [{:keys [counter el temp-converter]}]
+  (r/render el (ui {:counter @counter
+                    :temp-converter @temp-converter})))
 
 (defmethod module/start ::ui [_ {:keys [root-id] :as ctx}]
   (doto (assoc ctx :el (dom/getElement root-id)) render!))
